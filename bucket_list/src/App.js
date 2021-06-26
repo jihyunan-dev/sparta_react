@@ -1,30 +1,46 @@
 import React from "react";
-import logo from "./logo.svg";
 import BucketList from "./BucketList";
 import styled from "styled-components";
+import { withRouter } from "react-router";
+import { Route, Switch } from "react-router-dom";
+import Detail from "./Detail";
+import NotFound from "./NotFound";
+import { loadBucket, createBucket } from "./redux/modules/bucket";
+
+import { connect } from "react-redux";
 // import "./style.css";
 // import "./scss_ex.scss";
+
+const mapStateToProps = (state) => {
+  return { bucketList: state.bucket.list };
+};
+
+const mapDispatchToProps = (dispatch) => ({
+  load: () => {
+    dispatch(loadBucket()); // { type: LOAD, bucket }
+  },
+  create: (new_item) => {
+    dispatch(createBucket(new_item)); // { type: CREATE, bucket }
+  },
+});
 
 class App extends React.Component {
   constructor(props) {
     super(props);
     // App 컴포넌트의 state를 정의해줍니다.
-    this.state = {
-      list: ["영화관 가기", "매일 책읽기", "수영 배우기"],
-    };
+    this.state = {};
 
     this.text = React.createRef();
   }
 
   addBucket = () => {
-    const { list } = this.state;
     const value = this.text.current.value;
-    this.setState({ list: [...list, value] });
+    this.props.create(value);
     this.text.current.value = "";
   };
 
   componentDidMount() {
-    console.log(this.text.current);
+    console.log(this.props);
   }
 
   // 랜더 함수 안에 리액트 엘리먼트를 넣어줍니다!
@@ -33,21 +49,36 @@ class App extends React.Component {
     console.log(this.state.list);
 
     return (
-      <AppBox>
-        <Container>
-          <Title>내 버킷리스트</Title>
-          <Line />
-          {/* 컴포넌트를 넣어줍니다. */}
-          {/* <컴포넌트 명 [props 명]={넘겨줄 것(리스트, 문자열, 숫자, ...)}/> */}
-          <BucketList list={this.state.list} />
-        </Container>
-        <BucketForm>
-          <input type="text" ref={this.text} />
-          <button type="button" onClick={this.addBucket}>
-            추가하기
-          </button>
-        </BucketForm>
-      </AppBox>
+      <>
+        <AppBox>
+          <Container>
+            <Title>내 버킷리스트</Title>
+            <Line />
+            {/* 컴포넌트를 넣어줍니다. */}
+            {/* <컴포넌트 명 [props 명]={넘겨줄 것(리스트, 문자열, 숫자, ...)}/> */}
+            <Switch>
+              <Route
+                exact
+                path="/"
+                render={(props) => (
+                  <BucketList
+                    list={this.props.bucketList}
+                    history={this.props.history}
+                  />
+                )}
+              />
+              <Route path="/detail/:index" component={Detail} />
+              <Route component={NotFound} />
+            </Switch>
+          </Container>
+          <BucketForm>
+            <input type="text" ref={this.text} />
+            <button type="button" onClick={this.addBucket}>
+              추가하기
+            </button>
+          </BucketForm>
+        </AppBox>
+      </>
     );
   }
 }
@@ -90,4 +121,4 @@ const BucketForm = styled.form`
   background-color: white;
 `;
 
-export default App;
+export default connect(mapStateToProps, mapDispatchToProps)(withRouter(App));
