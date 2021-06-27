@@ -1,12 +1,9 @@
 import React from "react";
 import styled from "styled-components";
-import { useSelector, useDispatch } from "react-redux";
-import { deleteBucket } from "./redux/modules/bucket";
+import { useSelector } from "react-redux";
 
 const BucketList = (props) => {
   const bucket_list = useSelector((state) => state.bucket.list);
-
-  const dispatch = useDispatch();
 
   return (
     <Lists>
@@ -14,20 +11,12 @@ const BucketList = (props) => {
         return (
           <ListItem
             key={index}
+            color={list.completed ? "#ee5253" : "aliceblue"}
             onClick={() => {
               props.history.push("/detail/" + index);
             }}
           >
-            {list}
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                dispatch(deleteBucket(list));
-              }}
-            >
-              삭제
-            </button>
+            {list.text}
           </ListItem>
         );
       })}
@@ -39,6 +28,7 @@ const Lists = styled.div`
   display: flex;
   flex-direction: column;
   height: 100%;
+  max-height: 40vh;
   overflow-x: hidden;
   overflow-y: auto;
 `;
@@ -46,7 +36,7 @@ const Lists = styled.div`
 const ListItem = styled.div`
   padding: 16px;
   margin: 8px;
-  background-color: aliceblue;
+  background-color: ${(props) => props.color};
   cursor: pointer;
 `;
 
